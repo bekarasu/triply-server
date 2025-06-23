@@ -12,7 +12,16 @@ services:
     volumes:
       - triply_postgres_data:/var/lib/postgresql/data
       - triply_initdb:/docker-entrypoint-initdb.d
+  redis:
+    image: redis:7
+    container_name: triply_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - triply_redis_data:/data
 
 volumes:
   triply_postgres_data:
   triply_initdb:
+  triply_redis_data:
