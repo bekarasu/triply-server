@@ -1,0 +1,18 @@
+services:
+  triply-postgres:
+    image: postgres:15
+    container_name: triply_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Qwe*123456
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - triply_postgres_data:/var/lib/postgresql/data
+      - triply_initdb:/docker-entrypoint-initdb.d
+
+volumes:
+  triply_postgres_data:
+  triply_initdb:

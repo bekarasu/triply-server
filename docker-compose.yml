@@ -1,0 +1,14 @@
+services:
+  triply-recommandation-service:
+    build:
+      context: ./recommandation-service
+    container_name: triply-recommandation-service
+    restart: always
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./recommandation-service/.env:/home/nonroot/application/.env
+      - triply_recommandation_service:/home/nonroot/application
+
+volumes:
+  triply_recommandation_service:
