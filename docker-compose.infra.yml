@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - triply_postgres_data:/var/lib/postgresql/data
-      - triply_initdb:/docker-entrypoint-initdb.d
+      - ${PWD}/.docker/init-scripts/postgresql:/docker-entrypoint-initdb.d
   redis:
     image: redis:7
     container_name: triply_redis
@@ -23,5 +23,4 @@ services:
 
 volumes:
   triply_postgres_data:
-  triply_initdb:
   triply_redis_data:
