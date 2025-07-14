@@ -7,6 +7,8 @@ import databaseConfig from './database.config';
 import loggerConfig from './logger.config';
 import debugConfig from './debug.config';
 import requestTimeoutConfig from './request-timeout.config';
+import redisConfig from './redis.config';
+import authenticationConfig from './authentication.config';
 
 export interface ConfigOptions {
   envFilePath: string;
@@ -28,6 +30,8 @@ export class InfrasConfigModule {
             loggerConfig,
             debugConfig,
             requestTimeoutConfig,
+            redisConfig,
+            authenticationConfig,
           ],
           envFilePath,
         }),

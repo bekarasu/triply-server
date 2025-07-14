@@ -1,5 +1,5 @@
-import { BaseException } from './exception.base'
-import { ExceptionCodes } from './exception.codes'
+import { BaseException } from './exception.base';
+import { ExceptionCodes } from './exception.codes';
 
 /**
  * Used to indicate that an incorrect argument was provided to a method/function/class constructor
@@ -8,5 +8,5 @@ import { ExceptionCodes } from './exception.codes'
  * @extends {ExceptionBase}
  */
 export class ArgumentInvalidException extends BaseException {
-	readonly code = ExceptionCodes.ArgumentsInvalid
+  readonly code = ExceptionCodes.ArgumentsInvalid;
 }

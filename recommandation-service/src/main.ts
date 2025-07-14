@@ -8,6 +8,8 @@ async function bootstrap() {
 
   setupSwagger(app);
   setupTimeout();
+  console.log(process.env.SERVICE_NAME)
+  app.setGlobalPrefix(process.env.SERVICE_NAME);
 
   await app.listen(process.env.PORT ?? 3000);
 }

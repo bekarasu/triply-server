@@ -1,5 +1,5 @@
-import { BaseException } from './exception.base'
-import { ExceptionCodes } from './exception.codes'
+import { BaseException } from './exception.base';
+import { ExceptionCodes } from './exception.codes';
 
 /**
  * Used to indicate that an argument was not provided (is empty object/array, null of undefined).
@@ -7,5 +7,5 @@ import { ExceptionCodes } from './exception.codes'
  * @class ArgumentNotProvidedException
  */
 export class ArgumentNotProvidedException extends BaseException {
-	readonly code = ExceptionCodes.ArgumentsNotProvided
+  readonly code = ExceptionCodes.ArgumentsNotProvided;
 }
