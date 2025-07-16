@@ -4,7 +4,7 @@ import { DEBUG_CONFIG } from '@infras/common';
 import { ConfigService } from '@nestjs/config';
 
 export default (app: INestApplication) => {
-  const sampleAccessToken = process.env.SWAGGER_SAMPLE_GAME_ACCESS_TOKEN;
+  const sampleAccessToken = process.env.SWAGGER_SAMPLE_ACCESS_TOKEN;
   const configService = app.get(ConfigService);
   const debugConfig = configService.get(DEBUG_CONFIG);
   if (debugConfig.enableSwagger) {

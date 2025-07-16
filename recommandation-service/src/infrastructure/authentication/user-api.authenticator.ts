@@ -1,12 +1,6 @@
 import { TokenExpiredError } from 'jsonwebtoken';
 
-import {
-  ExecutionContext,
-  Inject,
-  Injectable,
-  LoggerService,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import {
   AccessTokenExpiredException,
@@ -15,66 +9,63 @@ import {
 } from './authentication.errors';
 import {
   AuthenticationResult,
-  GameUser,
+  User,
   IAuthenticator,
 } from './authentication.interfaces';
 import { ConfigService } from '@nestjs/config';
 import { CONFIGS } from '../config';
-import { APP_LOGGER } from '@infras/logger';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
+import { IAppLogger, LoggerFactory } from '../logger';
 
 const ACCESS_TOKEN_HEADER = 'x-access-token';
 
-export interface GameAPIConfig {
+export interface UserAPIConfig {
   publicKey?: string;
-  secretKey?: string;
+  requestTimeout?: number;
 }
 
-export const USER_API_CONFIG_PROVIDER = 'AUTHENTICATION.USER_API';
+export const USER_API_CONFIG_PROVIDER = 'AUTHENTICATION.API';
 
 @Injectable()
-export class UserAPIAuthenticator implements IAuthenticator, OnModuleDestroy {
-  name = 'game-api';
-  private readonly config: GameAPIConfig;
+export class UserAPIAuthenticator implements IAuthenticator {
+  name = 'api';
+  private readonly config: UserAPIConfig;
   private readonly redisClient: Redis;
+  private readonly logger: IAppLogger;
 
   constructor(
     private readonly jwtService: JwtService,
     configService: ConfigService,
     redisService: RedisService,
-    @Inject(APP_LOGGER)
-    private readonly logger: LoggerService,
+    loggerFactory: LoggerFactory,
   ) {
     this.config = configService.get(CONFIGS.AUTHENTICATION)[
       USER_API_CONFIG_PROVIDER
     ];
-    this.redisClient = redisService.getOrThrow(CONFIGS.AUTHENTICATION);
-  }
-
-  onModuleDestroy() {
-    this.redisClient.disconnect();
+    this.logger = loggerFactory.createAppLogger('UserAPIAuthenticator');
+    this.redisClient = redisService.getOrThrow('authentication');
   }
 
   async handle(context: ExecutionContext): Promise<AuthenticationResult> {
     try {
       const req = context.switchToHttp().getRequest() as any;
       const accessToken = req.headers[ACCESS_TOKEN_HEADER] as string;
+
       if (!accessToken) {
         throw new MissingAccessTokenException();
       }
+
       const payload = await this.verifyAccessToken(accessToken);
       if (!payload) {
         throw new InvalidAccessTokenException();
       }
+
       const user = this.verifyPayloadUser(payload);
       if (!user) {
         throw new InvalidAccessTokenException();
       }
-
-      // Comment for game dev
-      // await this.verifyAccessTokenInUse(user.userId, accessToken)
-
+      await this.verifyAccessTokenInUse(user.sub, accessToken);
       req.auth = {
         user,
       };
@@ -83,34 +74,40 @@ export class UserAPIAuthenticator implements IAuthenticator, OnModuleDestroy {
       if (error instanceof TokenExpiredError) {
         throw new AccessTokenExpiredException();
       }
-      this.logger.error(error, '[game-api-authentication]');
+      this.logger.error(error);
       throw new InvalidAccessTokenException();
     }
   }
 
   async verifyAccessTokenInUse(userId: string, token: string) {
-    const currentAccessToken = await this.redisClient.get(userId);
-    if (currentAccessToken !== token) throw new InvalidAccessTokenException();
+    const { requestTimeout } = this.config;
+    try {
+      const currentAccessToken = await new Promise(async (resolve) => {
+        const timer = setTimeout(() => {
+          resolve(-1);
+        }, requestTimeout);
+        const accessToken = await this.redisClient.get(userId);
+        clearTimeout(timer);
+        resolve(accessToken);
+      });
+      if (currentAccessToken === -1) {
+        this.logger.debug(`Redis timeout after ${requestTimeout}`);
+        return;
+      }
+      if (!currentAccessToken) {
+        this.logger.debug('Current access token not found');
+        return;
+      }
+      if (currentAccessToken !== token) {
+        throw new InvalidAccessTokenException();
+      }
+    } catch (error) {
+      this.logger.error(error);
+    }
   }
 
   async verifyAccessToken(token: string) {
-    return Promise.allSettled([
-      this.verifyAccessTokenByPrivateKey(token),
-      this.verifyTokenWithSecret(token),
-    ])
-      .then((result) => {
-        if (result[0].status === 'fulfilled') {
-          return result[0].value;
-        }
-        if (result[1].status === 'fulfilled') {
-          return result[1].value;
-        }
-        // prioritize private key verification error
-        throw result[0].reason;
-      })
-      .catch((err) => {
-        throw err;
-      });
+    return this.verifyAccessTokenByPrivateKey(token);
   }
 
   private async verifyAccessTokenByPrivateKey(token: string) {
@@ -128,30 +125,21 @@ export class UserAPIAuthenticator implements IAuthenticator, OnModuleDestroy {
      */
     const verifyOptions = {
       publicKey: this.config.publicKey,
-      algorithm: ['RS256'],
+      algorithms: ['RS256'],
     } as JwtVerifyOptions;
     const payload = await this.jwtService.verifyAsync(token, verifyOptions);
     return payload;
   }
 
-  private async verifyTokenWithSecret(token: string) {
-    const payload = (await this.jwtService.verifyAsync(token, {
-      secret: this.config.secretKey,
-    })) as GameUser;
-    return payload;
-  }
-
   private verifyPayloadUser(payload: any) {
-    if (!payload || !payload.sub || !payload.profile) {
+    if (!payload || !payload.sub) {
       return null;
     }
     return {
-      profileId: payload.profile,
-      userId: payload.sub,
+      sub: payload.sub,
       provider: {
         id: payload.provider?.sub,
-        type: payload.provider?.type,
       },
-    } as GameUser;
+    } as User;
   }
 }

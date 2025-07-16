@@ -5,11 +5,7 @@ import { ExceptionFilterConfig } from './exception-filter.interfaces';
 @Module({})
 export class ExceptionFilterModule {
   static forRoot(options: ExceptionFilterConfig): DynamicModule {
-    const {
-      service,
-      isProduction = false,
-      requestIdHeader = 'x-tracer-id',
-    } = options;
+    const { service, isProduction = false } = options;
 
     return {
       module: ExceptionFilterModule,
@@ -20,7 +16,6 @@ export class ExceptionFilterModule {
           useValue: {
             service,
             isProduction,
-            requestIdHeader,
           },
         },
       ],

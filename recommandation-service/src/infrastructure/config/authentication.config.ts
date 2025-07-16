@@ -1,5 +1,5 @@
 import {
-  GameAPIConfig,
+  UserAPIConfig,
   INTERNAL_API_CONFIG_PROVIDER,
   InternalAPIConfig,
   USER_API_CONFIG_PROVIDER,
@@ -18,6 +18,6 @@ export default () => ({
         '\n',
       ),
       secretKey: process.env.JWT_TOKEN_SECRET,
-    } as GameAPIConfig,
+    } as UserAPIConfig,
   },
 });

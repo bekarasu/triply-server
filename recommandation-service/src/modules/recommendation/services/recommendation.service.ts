@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
-  RecommendationRepository,
   CreateRecommendationDto,
   UpdateRecommendationDto,
-} from './database/recommendation.repository';
-import { RecommendationEntity } from './database/entities/recommendation.entity';
+} from '../database/dtos';
+import { RecommendationEntity } from '../database/entities/recommendation.entity';
+import { RecommendationRepository } from '../database/recommendation.repository';
 
 export interface RecommendationCriteria {
   userId: string;
@@ -37,18 +37,6 @@ export class RecommendationService {
     return recommendation;
   }
 
-  async getRecommendationsByUserId(
-    userId: string,
-  ): Promise<RecommendationEntity[]> {
-    return await this.recommendationRepository.findByUserId(userId);
-  }
-
-  async getRecommendationsByTripId(
-    tripId: string,
-  ): Promise<RecommendationEntity[]> {
-    return await this.recommendationRepository.findByTripId(tripId);
-  }
-
   async updateRecommendation(
     id: string,
     data: UpdateRecommendationDto,
@@ -65,21 +53,6 @@ export class RecommendationService {
     if (!deleted) {
       throw new NotFoundException(`Recommendation with ID ${id} not found`);
     }
-  }
-
-  async generateRecommendations(
-    criteria: RecommendationCriteria,
-  ): Promise<RecommendationEntity[]> {
-    // This is a simplified recommendation algorithm
-    // In a real implementation, this would involve complex ML algorithms
-    const existingRecommendations = await this.getRecommendationsByUserId(
-      criteria.userId,
-    );
-
-    // Return top recommendations based on score
-    return existingRecommendations
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
   }
 
   async getHighQualityRecommendations(

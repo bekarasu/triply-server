@@ -12,7 +12,6 @@ export interface IAppLogger {
 }
 export interface LoggerConfig {
   levels?: LogLevel[];
-  requestIdHeader?: string;
   defaultContext?: string;
   appId?: string;
   printTrace?: boolean;

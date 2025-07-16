@@ -31,7 +31,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const req = ctx.getRequest();
     const res = ctx.getResponse();
-    const requestId = req.headers[this.config.requestIdHeader];
     let httpException: BaseHttpException;
     // handle exceptions of infrastructure
     if (exception instanceof InfrastructureException) {
@@ -45,7 +44,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       // log unhandled error
       this.logger.error(exception);
     }
-    httpException.setRequestId(requestId);
 
     const status = httpException.getStatus();
     const response = this.config.isProduction

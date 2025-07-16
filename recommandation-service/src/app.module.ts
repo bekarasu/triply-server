@@ -8,6 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import { RecommendationModule } from './modules/recommendation/recommendation.module';
 import { ExceptionFilterModule } from './infrastructure/exception-filters';
 import { RedisInfrasModule } from './infrastructure/redis';
+import { InfrasAuthenticationModule } from './infrastructure/authentication';
+import { RequestTimeoutModule } from './infrastructure/request-timeout';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { RedisInfrasModule } from './infrastructure/redis';
     }),
     InfrastructureTypeOrmModule,
     RedisInfrasModule,
+    InfrasAuthenticationModule,
+    RequestTimeoutModule,
     LoggerModule.forRootAsync({
       type: 'console',
       configProvider: {
@@ -24,10 +28,10 @@ import { RedisInfrasModule } from './infrastructure/redis';
         inject: [ConfigService],
       },
     }),
+    RecommendationModule,
     ExceptionFilterModule.forRoot({
       service: 'recommendation',
     }),
-    RecommendationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
