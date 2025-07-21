@@ -54,7 +54,7 @@ export class ProviderValidationGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
     const provider = req.auth?.user?.provider;
-    if (!provider || !provider.id || provider.type !== 'sfc') {
+    if (!provider || !provider.id || provider.type !== 'triply') {
       throw new InvalidAccessTokenException(
         'User with this provider is not authorized to access',
       );
