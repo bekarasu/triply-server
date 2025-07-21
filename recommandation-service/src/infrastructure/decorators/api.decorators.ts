@@ -56,6 +56,15 @@ export const UserAPI = (options: UserAPIOptions = {}) => {
   return applyDecorators(...decorators);
 };
 
+export const PublicAPI = () => {
+  const decorators = [
+    UseFilters(HttpExceptionFilter),
+    UseInterceptors(HttpLoggingInterceptor),
+  ];
+
+  return applyDecorators(...decorators);
+};
+
 /* export const InternalAPI = (options: InternalAPIOptions) => {
   const { byPassAuthentication = false } = options;
   const decorators = [
