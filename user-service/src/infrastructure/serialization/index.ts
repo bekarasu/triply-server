@@ -1,1 +1,1 @@
-export { SerializationModule } from './serialization.module'
+export { SerializationModule } from './serialization.module';
