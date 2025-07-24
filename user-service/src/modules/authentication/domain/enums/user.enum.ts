@@ -1,0 +1,7 @@
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  WAITING_VERIFICATION = 'WAITVERIFY',
+  INIT = 'INIT',
+}
