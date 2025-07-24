@@ -2,13 +2,13 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 // configuration
+import authenticationConfig from './authentication.config';
 import { validateConfig } from './config.utils';
 import databaseConfig from './database.config';
-import loggerConfig from './logger.config';
 import debugConfig from './debug.config';
-import requestTimeoutConfig from './request-timeout.config';
+import loggerConfig from './logger.config';
 import redisConfig from './redis.config';
-import authenticationConfig from './authentication.config';
+import requestTimeoutConfig from './request-timeout.config';
 
 export interface ConfigOptions {
   envFilePath: string;

@@ -1,7 +1,6 @@
 import { HttpLoggingInterceptor } from '@infras/logger';
 import {
   applyDecorators,
-  Controller,
   UseFilters,
   UseGuards,
   UseInterceptors,
