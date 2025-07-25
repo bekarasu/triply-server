@@ -1,12 +1,6 @@
-import { UserRecommendationEntity } from './../database/entities/user_recommendation.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { RecommendationRepository } from '../database/recommendation.repository';
-import { RecommendationEntity } from '../database/entities/recommendation.entity';
-import {
-  CreateRecommendationDto,
-  UpdateRecommendationDto,
-} from '../database/dtos';
 import { UserRecommendationRepository } from '../database/user-recommendation.repository';
+import { UserRecommendationEntity } from './../database/entities/user_recommendation.entity';
 
 export interface RecommendationCriteria {
   userId: string;

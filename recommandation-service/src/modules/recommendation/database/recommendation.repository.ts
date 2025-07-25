@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { RecommendationEntity } from './entities/recommendation.entity';
-import { CreateRecommendationDto } from './dtos/create-recommandation.dto';
-import { UpdateRecommendationDto } from './dtos/update-recommandation.dto';
+import { CreateRecommendationDto } from './dtos/create-recommendation.dto';
+import { UpdateRecommendationDto } from './dtos/update-recommendation.dto';
 
 @Injectable()
 export class RecommendationRepository {

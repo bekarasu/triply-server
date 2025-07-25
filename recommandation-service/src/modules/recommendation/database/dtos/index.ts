@@ -1,2 +1,2 @@
-export * from './create-recommandation.dto';
-export * from './update-recommandation.dto';
+export * from './create-recommendation.dto';
+export * from './update-recommendation.dto';
