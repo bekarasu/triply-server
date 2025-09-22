@@ -10,5 +10,29 @@ services:
       - ./recommandation-service/.env:/home/nonroot/application/.env
       - triply_recommandation_service:/home/nonroot/application
 
+  triply-user-service:
+    build:
+      context: ./user-service
+    container_name: triply-user-service
+    restart: always
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./user-service/.env:/home/nonroot/application/.env
+      - triply_user_service:/home/nonroot/application
+
+  triply-travel-service:
+    build:
+      context: ./travel-service
+    container_name: triply-travel-service
+    restart: always
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./travel-service/.env:/home/nonroot/application/.env
+      - triply_travel_service:/home/nonroot/application
+
 volumes:
   triply_recommandation_service:
+  triply_user_service:
+  triply_travel_service:
