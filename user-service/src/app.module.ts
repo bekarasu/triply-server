@@ -10,6 +10,7 @@ import { RedisInfrasModule } from './infrastructure/redis';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { RequestTimeoutModule } from './infrastructure/request-timeout';
 import { SerializationModule } from './infrastructure/serialization';
+import { ProfileModule } from './modules/profile/profile.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SerializationModule } from './infrastructure/serialization';
       },
     }),
     AuthenticationModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
