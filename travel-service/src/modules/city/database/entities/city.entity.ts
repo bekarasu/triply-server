@@ -18,8 +18,26 @@ export class CityEntity {
   @Column({ length: 100 })
   name: string;
 
+  @Column({ length: 10 })
+  capital: string;
+
+  @Column({ length: 100 })
+  admin_name: string;
+
+  @Column({ length: 100 })
+  city_ascii: string;
+
   @Column({ name: 'country_id' })
   countryId: number;
+
+  @Column({ name: 'population' })
+  population: number;
+
+  @Column({ name: 'latitude', type: 'decimal', precision: 9, scale: 6 })
+  latitude: number;
+
+  @Column({ name: 'longitude', type: 'decimal', precision: 9, scale: 6 })
+  longitude: number;
 
   @ManyToOne(() => CountryEntity, (country) => country.cities)
   @JoinColumn({ name: 'country_id' })

@@ -18,7 +18,9 @@ export class CountryEntity {
   name: string;
 
   @Column({ length: 5, unique: true })
-  code: string;
+  iso2: string;
+  @Column({ length: 5, unique: true })
+  iso3: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
