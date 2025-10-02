@@ -16,7 +16,7 @@ export default (app: INestApplication) => {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup(`swagger`, app, document);
+    SwaggerModule.setup(`${process.env.SERVICE_NAME}/swagger`, app, document);
   }
 };
 

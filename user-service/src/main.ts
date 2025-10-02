@@ -6,9 +6,9 @@ import setupTimeout from './bootstraps/timeout';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix(process.env.SERVICE_NAME);
   setupSwagger(app);
   setupTimeout();
-  app.setGlobalPrefix(process.env.SERVICE_NAME);
 
   await app.listen(process.env.PORT ?? 3000);
 }
