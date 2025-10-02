@@ -1,0 +1,1 @@
+ALTER TABLE cities ADD COLUMN priority SMALLINT CHECK (priority >= 0);
