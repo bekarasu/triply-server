@@ -3,4 +3,5 @@ export default {
   LOGGER: 'logger',
   AUTHENTICATION: 'authentication',
   REDIS: 'redis',
+  OPENAI: 'openai',
 };
