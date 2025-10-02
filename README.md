@@ -78,11 +78,6 @@ Create the required databases and users by running the init scripts in each serv
 ```bash
 # Start all microservices
 docker-compose up -d
-
-# Or start individual services for development
-cd user-service && yarn install && yarn run start:dev
-cd travel-service && yarn install && yarn run start:dev
-cd recommendation-service && yarn install && yarn run start:dev
 ```
 
 ## 📚 API Documentation
@@ -117,24 +112,6 @@ Once the services are running, access the Swagger documentation:
 
 ## 🔧 Development
 
-### Installing Dependencies
-
-```bash
-cd user-service && yarn install
-cd travel-service && yarn install
-cd recommendation-service && yarn install
-```
-
-### Code Formatting
-
-```bash
-# Format code for all services
-yarn format
-
-# Lint code
-yarn lint
-```
-
 ### Database Migrations
 
 Run the SQL migration files in the `database_migrations/` directory for each service in order:
@@ -157,9 +134,9 @@ Run the SQL migration files in the `database_migrations/` directory for each ser
 
 ```yaml
 # docker-compose.yml
+- recommendation-service (port 3001)
 - user-service (port 3002)
 - travel-service (port 3003)
-- recommendation-service (port 3001)
 ```
 
 ## 🔐 Security Features

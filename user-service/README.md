@@ -1,6 +1,5 @@
 # User Service
 
-
 ## Features
 
 - Modular architecture with clear separation of concerns
@@ -66,6 +65,16 @@ This service provides interactive API documentation using [Swagger](https://swag
 ### Example
 
 If you see a section called "Sample Access Token" in the Swagger UI, you can use the provided token to authorize requests for endpoints that require authentication.
+
+## Code Formatting
+
+```bash
+# Format code for all services
+yarn format
+
+# Lint code
+yarn lint
+```
 
 ## License
 
