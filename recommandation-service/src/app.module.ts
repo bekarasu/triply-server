@@ -6,6 +6,7 @@ import { InfrastructureTypeOrmModule } from './infrastructure/typeorm/typeorm.mo
 import { LoggerModule } from './infrastructure/logger';
 import { ConfigService } from '@nestjs/config';
 import { RecommendationModule } from './modules/recommendation/recommendation.module';
+import { CriteriasModule } from './modules/criterias/criterias.module';
 import { ExceptionFilterModule } from './infrastructure/exception-filters';
 import { RedisInfrasModule } from './infrastructure/redis';
 import { InfrasAuthenticationModule } from './infrastructure/authentication';
@@ -29,6 +30,7 @@ import { RequestTimeoutModule } from './infrastructure/request-timeout';
       },
     }),
     RecommendationModule,
+    CriteriasModule,
     ExceptionFilterModule.forRoot({
       service: 'recommendation',
     }),
