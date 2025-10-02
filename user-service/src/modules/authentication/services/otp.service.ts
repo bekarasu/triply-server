@@ -1,11 +1,15 @@
 import { RedisService } from '@liaoliaots/nestjs-redis';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import {
+  EMAIL_SERVICE_PROVIDER,
+  IEmailService,
+} from '@src/infrastructure/adapters/email';
+import { CONFIGS } from '@src/infrastructure/config';
 import { IAppLogger, LoggerFactory } from '@src/infrastructure/logger';
 import { Redis } from 'ioredis';
 import { InvalidOtpError } from '../errors/otp.errors';
-import { CONFIGS } from '@src/infrastructure/config';
 
 export interface OtpServiceConfig {
   otpExpirationTime: number;
@@ -24,6 +28,8 @@ export class OtpService {
     configService: ConfigService,
     loggerFactory: LoggerFactory,
     private readonly jwtService: JwtService,
+    @Inject(EMAIL_SERVICE_PROVIDER)
+    private readonly emailService: IEmailService,
   ) {
     this.redisClient = redisService.getOrThrow('authentication');
     this.logger = loggerFactory.createAppLogger('OtpService');
@@ -59,7 +65,9 @@ export class OtpService {
         `OTP stored for email: ${email} with purpose: ${purpose}`,
       );
       this.logger.debug(`OTP Code: ${otpCode}`);
-      // TODO send email with OTP code
+
+      await this.sendOtpEmail(email, otpCode, purpose);
+
       return { otpCode, otpToken };
     } catch (error) {
       this.logger.error(
@@ -157,6 +165,43 @@ export class OtpService {
     } catch (error) {
       this.logger.error(
         `Failed to clear OTP for email: ${email}. Error: ${error.message}`,
+      );
+    }
+  }
+
+  private async sendOtpEmail(
+    email: string,
+    otpCode: string,
+    purpose: string,
+  ): Promise<void> {
+    try {
+      const result = await this.emailService.sendEmail({
+        to: email,
+        subject: `Your verification code for ${purpose}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Verification Code</h2>
+            <p>Your verification code for ${purpose} is:</p>
+            <div style="background-color: #f5f5f5; padding: 20px; text-align: center; margin: 20px 0;">
+              <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 5px;">${otpCode}</h1>
+            </div>
+            <p style="color: #666;">This code will expire in ${Math.floor(this.config.otpExpirationTime / 60)} minutes.</p>
+            <p style="color: #666; font-size: 14px;">If you didn't request this code, please ignore this email.</p>
+          </div>
+        `,
+        text: `Your verification code for ${purpose} is: ${otpCode}. This code will expire in ${Math.floor(this.config.otpExpirationTime / 60)} minutes.`,
+      });
+
+      if (result.success) {
+        this.logger.log(`OTP email sent successfully to ${email}`);
+      } else {
+        this.logger.error(
+          `Failed to send OTP email to ${email}: ${result.error}`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Error sending OTP email to ${email}: ${error.message}`,
       );
     }
   }

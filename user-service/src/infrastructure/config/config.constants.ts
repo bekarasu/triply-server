@@ -4,4 +4,5 @@ export default {
   AUTHENTICATION: 'authentication',
   REDIS: 'redis',
   OTP: 'otp',
+  SMTP: 'smtp',
 };

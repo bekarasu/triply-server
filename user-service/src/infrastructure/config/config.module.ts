@@ -11,6 +11,7 @@ import redisConfig from './redis.config';
 import requestTimeoutConfig from './request-timeout.config';
 import tokenConfig from './token.config';
 import otpConfig from './otp.config';
+import smtpConfig from './smtp.config';
 
 export interface ConfigOptions {
   envFilePath: string;
@@ -36,6 +37,7 @@ export class InfrasConfigModule {
             authenticationConfig,
             tokenConfig,
             otpConfig,
+            smtpConfig,
           ],
           envFilePath,
         }),

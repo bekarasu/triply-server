@@ -11,6 +11,7 @@ import { AuthenticationModule } from './modules/authentication/authentication.mo
 import { RequestTimeoutModule } from './infrastructure/request-timeout';
 import { SerializationModule } from './infrastructure/serialization';
 import { ProfileModule } from './modules/profile/profile.module';
+import { SMTPModule } from './infrastructure/adapters/email';
 
 @Module({
   imports: [
@@ -31,6 +32,11 @@ import { ProfileModule } from './modules/profile/profile.module';
           configService.get(CONFIGS.LOGGER),
         inject: [ConfigService],
       },
+    }),
+    SMTPModule.forRootAsync({
+      useFactory: (configService: ConfigService) =>
+        configService.get(CONFIGS.SMTP),
+      inject: [ConfigService],
     }),
     AuthenticationModule,
     ProfileModule,
