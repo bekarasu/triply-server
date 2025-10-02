@@ -33,6 +33,9 @@ export class CityEntity {
   @Column({ name: 'population' })
   population: number;
 
+  @Column({ name: 'priority' })
+  priority: number;
+
   @Column({ name: 'latitude', type: 'decimal', precision: 9, scale: 6 })
   latitude: number;
 

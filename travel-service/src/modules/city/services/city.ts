@@ -92,6 +92,20 @@ export class CityService {
   }
 
   /**
+   * Get city suggestions for autocomplete
+   */
+  async getCitiesByCountryId(
+    countryId: number,
+    excludeList: number[] = [],
+  ): Promise<CityEntity[]> {
+    return await this.cityRepository.findAllByCountryId(
+      countryId,
+      excludeList,
+      ['primary', 'admin'],
+    );
+  }
+
+  /**
    * Get popular cities for default suggestions
    */
   async getPopularCities(

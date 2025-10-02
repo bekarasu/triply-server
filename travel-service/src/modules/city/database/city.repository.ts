@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { CityEntity } from './entities/city.entity';
 
 export interface CitySearchOptions {
@@ -26,10 +26,57 @@ export class CityRepository {
     private readonly repository: Repository<CityEntity>,
   ) {}
 
-  async findAllByCountryId(countryId: number): Promise<CityEntity[]> {
-    return await this.repository.find({
-      where: { deletedAt: null, countryId },
-    });
+  async findAllByCountryId(
+    countryId: number,
+    excludeList: number[] = [],
+    capital?: string[],
+    options?: {
+      limit?: number;
+      includeCountry?: boolean;
+      sortBy?: 'priority' | 'population' | 'name';
+    },
+  ): Promise<CityEntity[]> {
+    const queryBuilder = this.repository.createQueryBuilder('city');
+
+    if (options?.includeCountry) {
+      queryBuilder.leftJoinAndSelect('city.country', 'country');
+    }
+
+    queryBuilder
+      .where('city.deletedAt IS NULL')
+      .andWhere('city.countryId = :countryId', { countryId });
+
+    if (excludeList && excludeList.length > 0) {
+      queryBuilder.andWhere('city.id NOT IN (:...excludeList)', {
+        excludeList,
+      });
+    }
+
+    if (capital && capital.length > 0) {
+      queryBuilder.andWhere('city.capital IN (:...capital)', { capital });
+    }
+
+    // Dynamic sorting
+    switch (options?.sortBy) {
+      case 'name':
+        queryBuilder.orderBy('city.name', 'ASC');
+        break;
+      case 'population':
+        queryBuilder.orderBy('city.population', 'DESC');
+        break;
+      case 'priority':
+      default:
+        queryBuilder
+          .orderBy('city.priority', 'ASC')
+          .addOrderBy('city.population', 'DESC');
+        break;
+    }
+
+    if (options?.limit) {
+      queryBuilder.limit(options.limit);
+    }
+
+    return await queryBuilder.getMany();
   }
 
   /**
@@ -239,10 +286,57 @@ export class CityRepository {
   }
 
   /**
+   * Find capital cities by country
+   * Best for: Getting capital cities specifically
+   */
+  async findCapitalsByCountryId(
+    countryId: number,
+    capitalTypes: string[] = ['primary', 'admin'],
+  ): Promise<CityEntity[]> {
+    return await this.repository.find({
+      where: {
+        deletedAt: null,
+        countryId,
+        capital: In(capitalTypes),
+      },
+      order: {
+        priority: 'ASC',
+        population: 'DESC',
+      },
+    });
+  }
+
+  /**
+   * Find all capitals across countries
+   * Best for: Getting all capital cities
+   */
+  async findAllCapitals(
+    capitalTypes: string[] = ['primary', 'admin'],
+    countryIds?: number[],
+  ): Promise<CityEntity[]> {
+    const whereCondition: any = {
+      deletedAt: null,
+      capital: In(capitalTypes),
+    };
+
+    if (countryIds && countryIds.length > 0) {
+      whereCondition.countryId = In(countryIds);
+    }
+
+    return await this.repository.find({
+      where: whereCondition,
+      relations: ['country'],
+      order: {
+        priority: 'ASC',
+        population: 'DESC',
+      },
+    });
+  }
+
+  /**
    * Get popular cities (by population) for suggestions
    * Best for: Default suggestions, popular destinations
    */
-  // TODO add popular column for better suggestions
   // TODO add user community based popular cities
   async getPopularCities(
     countryId?: number,
@@ -253,7 +347,10 @@ export class CityRepository {
       .leftJoinAndSelect('city.country', 'country')
       .select(['country.name', 'country.iso2'])
       .where('city.deletedAt IS NULL')
-      .andWhere('city.capital = :capital', { capital: 'admin' })
+      .andWhere('city.capital = :capital or city.capital = :capital2', {
+        capital: 'admin',
+        capital2: 'primary',
+      })
       .andWhere('city.population IS NOT NULL');
 
     queryBuilder.addSelect([
@@ -267,7 +364,8 @@ export class CityRepository {
     }
 
     return await queryBuilder
-      .orderBy('city.population', 'DESC')
+      .orderBy('city.priority', 'ASC')
+      .addOrderBy('city.population', 'DESC')
       .limit(limit)
       .getMany();
   }

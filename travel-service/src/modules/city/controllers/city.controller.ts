@@ -1,5 +1,11 @@
-import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { Controller, Get, Param, Query, ValidationPipe } from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiQuery,
+  ApiParam,
+} from '@nestjs/swagger';
 import { SuccessResponse } from '@src/libs/responses';
 import { CityService, SearchCitiesRequest } from '../services/city';
 import { UserAPI } from '@src/infrastructure/decorators';
@@ -269,6 +275,38 @@ export class CityController {
     return new SuccessResponse({
       message: `Advanced search found ${result.total} cities`,
       data: result,
+    });
+  }
+
+  @Get('country/:countryId')
+  @ApiOperation({ summary: 'Get cities by country' })
+  @ApiResponse({ status: 200, description: 'City suggestions' })
+  @ApiParam({ name: 'countryId', type: Number })
+  @ApiQuery({
+    name: 'excludeList',
+    required: false,
+    type: String,
+    description: 'Comma-separated city IDs to exclude',
+  })
+  async getCitiesByCountryId(
+    @Param('countryId') countryId: number,
+    @Query('excludeList') excludeList?: string,
+  ): Promise<SuccessResponse<any>> {
+    console.log('geldi');
+    if (!countryId) {
+      return new SuccessResponse({
+        message: 'CountryId parameter is required',
+        data: [],
+      });
+    }
+    const cities = await this.cityService.getCitiesByCountryId(
+      countryId,
+      excludeList ? excludeList.split(',').map(Number) : [],
+    );
+
+    return new SuccessResponse({
+      message: 'Cities by country retrieved successfully',
+      data: cities,
     });
   }
 }
