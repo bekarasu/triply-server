@@ -5,11 +5,16 @@ import {
   UserRefreshSessionOrmEntity,
   UserRefreshSessionTypeOrmRepository,
 } from './database/user-refresh-token';
-import { RefreshTokenService } from './services/refresh-token';
+import { AuthTokenService } from './services/auth-token';
+import {
+  UserOrmEntity,
+  UserOrmRepository,
+  USER_REPOSITORY,
+} from '@src/libs/database';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserRefreshSessionOrmEntity]),
+    TypeOrmModule.forFeature([UserRefreshSessionOrmEntity, UserOrmEntity]),
     JwtModule.register({}),
   ],
   providers: [
@@ -17,8 +22,12 @@ import { RefreshTokenService } from './services/refresh-token';
       provide: 'IUserRefreshSessionRepository',
       useClass: UserRefreshSessionTypeOrmRepository,
     },
-    RefreshTokenService,
+    {
+      provide: USER_REPOSITORY,
+      useClass: UserOrmRepository,
+    },
+    AuthTokenService,
   ],
-  exports: [RefreshTokenService, 'IUserRefreshSessionRepository'],
+  exports: [AuthTokenService, 'IUserRefreshSessionRepository', USER_REPOSITORY],
 })
 export class TokenModule {}

@@ -6,16 +6,17 @@ import {
   IAuthFlowTokenService,
   TOKEN_SERVICE_PROVIDER,
 } from '../adapters/token-service';
+import { LOCAL_ACCOUNT_REPOSITORY } from '../authentication.constants';
+import { LocalAccountOrmEntity } from '../database';
 import {
-  LOCAL_ACCOUNT_REPOSITORY,
-  USER_REPOSITORY,
-} from '../authentication.constants';
-import { IUserRepository, LocalAccountOrmEntity } from '../database';
-import { UserOrmEntity } from '../database/entities/user';
+  IUserRepository,
+  UserOrmEntity,
+  USER_REPOSITORY as SHARED_USER_REPOSITORY,
+} from '@src/libs/database';
 import { ILocalAccountRepository } from '../database/repositories/interfaces/local-account.interface';
 import { AuthProvider } from '../domain/enums/auth-provider.enum';
 import { UserStatus } from '../domain/enums/user.enum';
-import { UserVO } from '../domain/value-objects/user';
+import { UserVO } from '@src/libs/database';
 import {
   EmailAlreadyVerifiedError,
   InvalidCredentialsError,
@@ -24,6 +25,7 @@ import {
   UserNotExistError,
 } from '../errors';
 import { LoginDto } from './dtos/login.dto';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { PreRegisterDto } from './dtos/pre-register.dto';
 import { OtpService } from './otp.service';
 import { PasswordService } from './password.service';
@@ -35,7 +37,7 @@ export class UserAuthenticationService {
   constructor(
     @Inject(TOKEN_SERVICE_PROVIDER)
     protected readonly authFlowTokenService: IAuthFlowTokenService,
-    @Inject(USER_REPOSITORY)
+    @Inject(SHARED_USER_REPOSITORY)
     private readonly userRepo: IUserRepository,
     @Inject(LOCAL_ACCOUNT_REPOSITORY)
     private readonly localRepo: ILocalAccountRepository,
@@ -115,15 +117,12 @@ export class UserAuthenticationService {
         throw new EmailAlreadyVerifiedError();
       }
 
-      // TODO refactor here
       const { otpCode, otpToken } = await this.otpService.storeOtp(
         email,
         'registration',
       );
 
-      // TODO In a real application, you would send the OTP via email here. For now, we'll just log it (remove in production)
-      this.logger.log(`OTP generated for ${email}`);
-      this.logger.log(`Password hashed and ready for registration`);
+      this.logger.log(`OTP generated for ${email} OTP code is: ${otpCode}`);
 
       return {
         message: 'OTP sent successfully',
@@ -214,7 +213,6 @@ export class UserAuthenticationService {
       this.logger.warn(
         `OTP resend attempt for already verified user: ${normalizedEmail}`,
       );
-      // TODO throw another error
       throw new EmailAlreadyVerifiedError();
     }
 
@@ -255,6 +253,24 @@ export class UserAuthenticationService {
     return {
       message: 'Password updated successfully',
     };
+  }
+
+  async refreshToken(
+    dto: RefreshTokenDto,
+  ): Promise<{ code: string; token: AuthTokens }> {
+    try {
+      const authTokens = await this.authFlowTokenService.renewTokens(
+        dto.refreshToken,
+      );
+
+      return {
+        code: '200',
+        token: authTokens,
+      };
+    } catch (error) {
+      this.logger.error('Token refresh failed');
+      throw error;
+    }
   }
 
   private async proceedsAuthorizeSuccess(

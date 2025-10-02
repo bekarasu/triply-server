@@ -1,10 +1,10 @@
 import {
-  RefreshTokenServiceConfig,
-  REFRESH_TOKEN_SERVICE_CONFIG,
+  AuthTokenServiceConfig,
+  AUTH_TOKEN_SERVICE_CONFIG,
 } from '@src/modules/token';
 
 export default () => ({
-  [REFRESH_TOKEN_SERVICE_CONFIG]: {
+  [AUTH_TOKEN_SERVICE_CONFIG]: {
     signTokenPrivateKey: process.env.AUTH_ACCESS_TOKEN_PRIVATE_KEY.replace(
       /\\n/gm,
       '\n',
@@ -15,5 +15,5 @@ export default () => ({
     ),
     refreshTokenExpiredIn: parseInt(process.env.REFRESH_TOKEN_EXPIRE_TIME),
     accessTokenExpiredIn: parseInt(process.env.ACCESS_TOKEN_EXPIRE_TIME),
-  } as RefreshTokenServiceConfig,
+  } as AuthTokenServiceConfig,
 });

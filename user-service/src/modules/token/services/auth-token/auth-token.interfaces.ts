@@ -1,4 +1,4 @@
-import { AuthTokens } from './refresh-token.dto';
+import { AuthTokens } from './auth-token.dto';
 
 export interface IPayloadSerializer<T extends BasePayload> {
   serialize(): T | Promise<T>;
@@ -8,7 +8,7 @@ export interface BasePayload {
   sub: string;
 }
 
-export interface IRefreshTokenService {
+export interface IAuthTokenService {
   generateTokens(
     payloadSerializer: IPayloadSerializer<BasePayload>,
   ): Promise<AuthTokens | Error>;

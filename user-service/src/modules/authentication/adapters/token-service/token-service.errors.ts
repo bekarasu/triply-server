@@ -6,7 +6,9 @@ export class InvalidRegistrationTokenException extends BaseException {
   constructor(detail?: ExceptionDetail) {
     super('Invalid registration token error');
 
-    detail && this.details.push(detail);
+    if (detail) {
+      this.details.push(detail);
+    }
   }
 }
 
@@ -16,7 +18,9 @@ export class InvalidLinkAccountTokenException extends BaseException {
   constructor(detail?: ExceptionDetail) {
     super('Invalid link account token error');
 
-    detail && this.details.push(detail);
+    if (detail) {
+      this.details.push(detail);
+    }
   }
 }
 
@@ -26,7 +30,9 @@ export class InvalidSelectAccountTokenException extends BaseException {
   constructor(detail?: ExceptionDetail) {
     super('Invalid select account token error');
 
-    detail && this.details.push(detail);
+    if (detail) {
+      this.details.push(detail);
+    }
   }
 }
 
@@ -36,7 +42,9 @@ export class TokenExpiredException extends BaseException {
   constructor(detail?: ExceptionDetail) {
     super('Token is expired');
 
-    detail && this.details.push(detail);
+    if (detail) {
+      this.details.push(detail);
+    }
   }
 }
 
@@ -46,6 +54,8 @@ export class InvalidAuthTokenException extends BaseException {
   constructor(detail?: ExceptionDetail) {
     super('Invalid auth token error');
 
-    detail && this.details.push(detail);
+    if (detail) {
+      this.details.push(detail);
+    }
   }
 }

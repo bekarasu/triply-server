@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { RefreshTokenService } from '@src/modules/token';
+import { AuthTokenService } from '@src/modules/token';
 import { UserOrmEntity } from '../../database';
 import { AccessTokenPayloadSerializer } from './payload-serializer';
 import { AuthTokens } from './token-service.dto';
@@ -13,8 +13,7 @@ export interface JwtTokenServiceConfig {
 
 @Injectable()
 export class JwtTokenService implements IAuthFlowTokenService {
-  // TODO seperate jwt and refresh services
-  constructor(private readonly tokenService: RefreshTokenService) {}
+  constructor(private readonly tokenService: AuthTokenService) {}
 
   async revokeToken(user: UserOrmEntity): Promise<void> {
     const userId = user.id;

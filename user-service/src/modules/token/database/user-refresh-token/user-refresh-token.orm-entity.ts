@@ -17,7 +17,7 @@ export class UserRefreshSessionOrmEntity extends OrmEntityBase {
     super(props);
 
     if (props) {
-      this.id = uuidV4();
+      this.id = props.id ?? uuidV4();
       this.createdAt = new Date();
       this.updatedAt = new Date();
     }

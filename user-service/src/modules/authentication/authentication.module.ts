@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  REFRESH_TOKEN_SERVICE_CONFIG,
-  RefreshTokenService,
+  AuthTokenService,
+  AUTH_TOKEN_SERVICE_CONFIG,
   TokenModule,
 } from '../token';
 import {
@@ -20,9 +20,12 @@ import {
   LocalAccountOrmEntity,
   ProviderAccountOrmEntity,
   RefreshSessionOrmEntity,
+} from './database';
+import {
   UserOrmEntity,
   UserOrmRepository,
-} from './database';
+  USER_REPOSITORY as SHARED_USER_REPOSITORY,
+} from '@src/libs/database';
 import { LocalAccountOrmRepository } from './database/repositories/local-account.typeorm-repository';
 import { OtpService, PasswordService } from './services';
 
@@ -43,11 +46,15 @@ import { OtpService, PasswordService } from './services';
       useClass: JwtTokenService,
     },
     {
-      provide: REFRESH_TOKEN_SERVICE_CONFIG,
-      useClass: RefreshTokenService,
+      provide: AUTH_TOKEN_SERVICE_CONFIG,
+      useClass: AuthTokenService,
     },
     {
       provide: USER_REPOSITORY,
+      useClass: UserOrmRepository,
+    },
+    {
+      provide: SHARED_USER_REPOSITORY,
       useClass: UserOrmRepository,
     },
     {

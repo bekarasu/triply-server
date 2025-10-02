@@ -12,16 +12,22 @@ import {
   UserRefreshSessionOrmEntity,
 } from '../../database/user-refresh-token';
 import { RefreshSession } from '../../domain/value-objects';
-import { InvalidAuthTokenException } from './refresh-service.errors';
-import { REFRESH_TOKEN_SERVICE_CONFIG } from './refresh-token-service.providers';
-import { AuthTokens } from './refresh-token.dto';
+import { InvalidAuthTokenException } from './auth-service.errors';
+import { AUTH_TOKEN_SERVICE_CONFIG } from './auth-token-service.providers';
+import { AuthTokens } from './auth-token.dto';
 import {
   BasePayload,
   IPayloadSerializer,
-  IRefreshTokenService,
-} from './refresh-token.interfaces';
+  IAuthTokenService,
+} from './auth-token.interfaces';
+import { AccessTokenPayloadSerializer } from '@src/modules/authentication/adapters/token-service';
+import {
+  IUserRepository,
+  UserOrmEntity,
+  USER_REPOSITORY,
+} from '@src/libs/database';
 
-export interface RefreshTokenServiceConfig {
+export interface AuthTokenServiceConfig {
   signTokenPrivateKey: string;
   signTokenPublicKey: string;
   refreshTokenExpiredIn: number;
@@ -29,9 +35,9 @@ export interface RefreshTokenServiceConfig {
 }
 
 @Injectable()
-export class RefreshTokenService implements IRefreshTokenService {
+export class AuthTokenService implements IAuthTokenService {
   private readonly logger: IAppLogger;
-  private readonly config: RefreshTokenServiceConfig;
+  private readonly config: AuthTokenServiceConfig;
   private readonly redisClient: Redis;
 
   constructor(
@@ -39,11 +45,13 @@ export class RefreshTokenService implements IRefreshTokenService {
     configService: ConfigService,
     @Inject('IUserRefreshSessionRepository')
     private readonly repo: IUserRefreshSessionRepository,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: IUserRepository,
     loggerFactory: LoggerFactory,
     redisService: RedisService,
   ) {
-    this.logger = loggerFactory.createAppLogger('RefreshTokenService');
-    this.config = configService.get(REFRESH_TOKEN_SERVICE_CONFIG);
+    this.logger = loggerFactory.createAppLogger('AuthTokenService');
+    this.config = configService.get(AUTH_TOKEN_SERVICE_CONFIG);
     this.redisClient = redisService.getOrThrow(CONFIGS.AUTHENTICATION);
   }
 
@@ -54,17 +62,21 @@ export class RefreshTokenService implements IRefreshTokenService {
       const payload = await payloadSerializer.serialize();
 
       if (!payload.sub) throw new Error('Invalid payload');
-      const existedUser = await this.repo.getUserRefreshSessionById(
+      const existedRefreshToken = await this.repo.getUserRefreshSessionById(
         payload.sub,
       );
       const refreshSession = RefreshSession.generate();
 
-      if (!existedUser) {
+      if (!existedRefreshToken) {
         const newUser = new UserRefreshSessionOrmEntity({
+          id: payload.sub,
           refreshSession: refreshSession.refreshSession,
         });
 
         await this.repo.createRefreshSession(newUser);
+      } else {
+        existedRefreshToken.refreshSession = refreshSession.refreshSession;
+        await this.repo.updateRefreshSession(existedRefreshToken);
       }
 
       const expiresIn = this.config.refreshTokenExpiredIn;
@@ -74,12 +86,7 @@ export class RefreshTokenService implements IRefreshTokenService {
         this.generateAccessToken(payload),
       ]);
 
-      await this.redisClient.set(
-        payload.sub,
-        accessToken,
-        'EX',
-        expiresIn, // keep access token in redis within the duration of refresh token
-      );
+      await this.redisClient.set(payload.sub, accessToken, 'EX', expiresIn);
       return {
         refreshToken,
         accessToken,
@@ -109,39 +116,39 @@ export class RefreshTokenService implements IRefreshTokenService {
         oldRefreshToken,
         verifyOptions,
       );
-      const existedUser = await this.repo.getUserRefreshSessionById(
+      console.log('Old refresh token payload:', oldRefreshTokenPayload);
+      const existedUserRefreshToken = await this.repo.getUserRefreshSessionById(
         oldRefreshTokenPayload.sub,
       );
-      if (!existedUser) {
+      if (!existedUserRefreshToken) {
         throw new InvalidAuthTokenException();
       }
 
-      const accessToken = await this.redisClient.get(
-        oldRefreshTokenPayload.sub,
+      await this.isValidRefreshToken(
+        oldRefreshTokenPayload,
+        existedUserRefreshToken,
       );
-      if (!accessToken) {
-        this.logger.debug('Access token expired');
-        throw new InvalidAuthTokenException();
-      }
-      const accessTokenPayload = this.jwtService.decode(
-        accessToken,
-        verifyOptions,
-      ) as JwtPayload;
-
-      await this.isValidRefreshToken(oldRefreshTokenPayload, existedUser);
       const refreshSession = RefreshSession.generate();
 
       const userId = oldRefreshTokenPayload.sub;
-      await this.isValidRefreshToken(oldRefreshTokenPayload, existedUser);
+
+      const user: UserOrmEntity = await this.userRepo.getUserById(userId);
+      if (!user) {
+        throw new InvalidAuthTokenException();
+      }
+
+      const sss = new AccessTokenPayloadSerializer(user.toVO());
 
       const [newRefreshToken, newAccessToken] = await Promise.all([
         this.renewRefreshToken(refreshSession, oldRefreshTokenPayload),
-        this.generateAccessToken(accessTokenPayload as BasePayload),
+        this.generateAccessToken(sss.serialize()),
       ]);
 
-      await this.repo.updateRefreshSession(existedUser);
+      existedUserRefreshToken.refreshSession = refreshSession.refreshSession;
+
+      await this.repo.updateRefreshSession(existedUserRefreshToken);
       await this.redisClient.set(
-        accessTokenPayload.sub,
+        userId,
         newAccessToken,
         'EX',
         this.config.refreshTokenExpiredIn, // keep access token in redis within the duration of refresh token

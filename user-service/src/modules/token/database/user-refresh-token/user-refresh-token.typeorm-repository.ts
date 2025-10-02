@@ -45,10 +45,7 @@ export class UserRefreshSessionTypeOrmRepository
   async getUserRefreshSessionById(
     id: string,
   ): Promise<UserRefreshSessionOrmEntity> {
-    const getResult = await this.repo.findOneBy({
-      id: id,
-      // deletedAt: IsNull(),
-    });
+    const getResult = await this.repo.findOneBy({ id });
 
     if (!getResult) {
       return null;

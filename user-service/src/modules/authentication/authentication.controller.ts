@@ -16,7 +16,9 @@ import { TriplyPreRegisterResponseDto } from './dtos/responses/pre-register.dto'
 import { VerifyOtpRequestDto } from './dtos/requests/verify-otp.dto';
 import { ResendOtpRequestDto } from './dtos/requests/resend-otp.dto';
 import { ResendOtpResponseDto } from './dtos/responses/resend-otp.dto';
+import { RefreshTokenRequestDto } from './dtos/requests/refresh-token.dto';
 import { LoginDto } from './services/dtos/login.dto';
+import { RefreshTokenDto } from './services/dtos/refresh-token.dto';
 
 @ApiTags('authentication')
 @Controller('authentication')
@@ -129,6 +131,37 @@ export class AuthenticationController {
         message: result.message,
         email: result.email,
       },
+    });
+  }
+
+  @Post('refresh-token')
+  @ApiOperation({ summary: 'Refresh Access Token' })
+  @ApiBody({ type: RefreshTokenRequestDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed successfully',
+    type: SuccessResponse<LoginResponseDto>,
+  })
+  async refreshToken(
+    @Body() body: RefreshTokenRequestDto,
+  ): Promise<SuccessResponse<LoginResponseDto>> {
+    const refreshTokenDto: RefreshTokenDto = {
+      refreshToken: body.refreshToken,
+    };
+
+    const result =
+      await this.authenticationService.refreshToken(refreshTokenDto);
+    const loginData: LoginResponseDto = {
+      token: {
+        accessToken: result.token.accessToken,
+        refreshToken: result.token.refreshToken,
+        expiresIn: result.token.expiresIn,
+      },
+    };
+
+    return new SuccessResponse({
+      message: 'Token refreshed successfully',
+      data: loginData,
     });
   }
 }

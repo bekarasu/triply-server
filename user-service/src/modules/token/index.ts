@@ -1,3 +1,3 @@
 export { TokenModule } from './token.module';
 export * from './database';
-export * from './services/refresh-token';
+export * from './services/auth-token';
