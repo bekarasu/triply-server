@@ -22,6 +22,7 @@ export default () => ({
         '\n',
       ),
       secretKey: process.env.JWT_TOKEN_SECRET,
+      requestTimeout: parseInt(process.env.REQUEST_TIMEOUT_IN_MS) || 3000,
     } as UserAPIConfig,
   },
   [TOKEN_SERVICE_CONFIG_PROVIDER]: {

@@ -81,28 +81,24 @@ export class UserAPIAuthenticator implements IAuthenticator {
 
   async verifyAccessTokenInUse(userId: string, token: string) {
     const { requestTimeout } = this.config;
-    try {
-      const currentAccessToken = await new Promise(async (resolve) => {
-        const timer = setTimeout(() => {
-          resolve(-1);
-        }, requestTimeout);
-        const accessToken = await this.redisClient.get(userId);
-        clearTimeout(timer);
-        resolve(accessToken);
-      });
-      if (currentAccessToken === -1) {
-        this.logger.debug(`Redis timeout after ${requestTimeout}`);
-        return;
-      }
-      if (!currentAccessToken) {
-        this.logger.debug('Current access token not found');
-        return;
-      }
-      if (currentAccessToken !== token) {
-        throw new InvalidAccessTokenException();
-      }
-    } catch (error) {
-      this.logger.error(error);
+    const currentAccessToken = await new Promise(async (resolve) => {
+      const timer = setTimeout(() => {
+        resolve(-1);
+      }, requestTimeout);
+      const accessToken = await this.redisClient.get(userId);
+      clearTimeout(timer);
+      resolve(accessToken);
+    });
+    if (currentAccessToken === -1) {
+      this.logger.debug(`Redis timeout after ${requestTimeout}`);
+      throw new InvalidAccessTokenException();
+    }
+    if (!currentAccessToken) {
+      this.logger.debug('Current access token not found');
+      throw new InvalidAccessTokenException();
+    }
+    if (currentAccessToken !== token) {
+      throw new InvalidAccessTokenException();
     }
   }
 
