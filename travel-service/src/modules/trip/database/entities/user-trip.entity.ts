@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserRouteEntity } from './user-route.entity';
 
 @Entity('user_trips')
 export class UserTripEntity {
@@ -37,8 +38,8 @@ export class UserTripEntity {
   @DeleteDateColumn({ name: 'deleted_at' })
   deletedAt: Date | null;
 
-  @OneToMany('UserRouteEntity', 'trip')
-  routes: any[];
+  @OneToMany(() => UserRouteEntity, (route) => route.trip)
+  routes: UserRouteEntity[];
 
   constructor(props: Partial<UserTripEntity>) {
     if (props) {

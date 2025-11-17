@@ -10,6 +10,7 @@ import { RedisInfrasModule } from './infrastructure/redis';
 import { InfrasAuthenticationModule } from './infrastructure/authentication';
 import { RequestTimeoutModule } from './infrastructure/request-timeout';
 import { CityModule } from './modules/city/city.module';
+import { TripModule } from './modules/trip/trip.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CityModule } from './modules/city/city.module';
       },
     }),
     CityModule,
+    TripModule,
     ExceptionFilterModule.forRoot({
       service: 'travel',
     }),
