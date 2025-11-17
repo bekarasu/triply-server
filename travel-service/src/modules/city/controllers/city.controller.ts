@@ -7,7 +7,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { SuccessResponse } from '@src/libs/responses';
-import { CityService, SearchCitiesRequest } from '../services/city';
+import { CityService, SearchCitiesRequest } from '../services/city.service';
 import { UserAPI } from '@src/infrastructure/decorators';
 
 @ApiTags('cities')
