@@ -20,13 +20,13 @@ export class UserTripService {
 
     const createTripData = {
       userId: createData.userId,
-      tripStartDate: createData.startDate,
+      tripStartDate: new Date(createData.startDate),
       tripEndDate,
     };
 
     const tripData = await this.tripRepository.create(createTripData);
 
-    return tripData;
+    return { id: tripData.id };
   }
 
   // /**
