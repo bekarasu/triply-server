@@ -20,17 +20,15 @@ export class UserTripController {
     @Body() trip: CreateUserTripDto,
     @AuthUser() user: User,
   ): Promise<SuccessResponse<UserTripResponseDto>> {
+    // console.log('Simulating long processing time...');
+    // await new Promise((resolve) => {
+    //   setTimeout(() => {
+    //     resolve('done');
+    //   }, 10 * 1000);
+    // });
     trip.userId = user.sub;
     const result = await this.tripService.create(trip);
-
-    console.log('Simulating long processing time...');
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve('done');
-      }, 15000);
-    });
-
-    console.log('Finished long processing time.');
+    // console.log('Finished long processing time.');
 
     return new SuccessResponse({
       message: 'Trip created successfully',

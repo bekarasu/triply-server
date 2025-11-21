@@ -369,4 +369,8 @@ export class CityRepository {
       .limit(limit)
       .getMany();
   }
+
+  async findByIds(cityIds: number[]): Promise<CityEntity[]> {
+    return this.repository.findBy({ id: In(cityIds) });
+  }
 }

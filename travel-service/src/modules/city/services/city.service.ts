@@ -193,4 +193,8 @@ export class CityService {
 
     return result;
   }
+
+  getCitiesByIds(cityIds: number[]): Promise<CityEntity[]> {
+    return this.cityRepository.findByIds(cityIds);
+  }
 }

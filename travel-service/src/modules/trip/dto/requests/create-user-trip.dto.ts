@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsValidDateString } from '@src/libs/validations/is-valid-date-string.validator';
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsNotEmpty,
@@ -14,6 +15,8 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
+import { UserDestinationEntity } from '../../database/entities/user-destination.entity';
+import { UserTripEntity } from '../../database/entities/user-trip.entity';
 
 export class DestinationDto {
   @ApiProperty({
@@ -34,7 +37,7 @@ export class DestinationDto {
   @IsNumber({}, { message: 'Budget must be a number' })
   @IsPositive({ message: 'Budget must be a positive number' })
   @Min(0, { message: 'Budget must be at least 0' })
-  @Max(1000000, { message: 'Budget cannot exceed 1,000,000' })
+  @Max(100000, { message: 'Budget cannot exceed 100,000' })
   budget: number;
 
   @ApiProperty({
@@ -84,6 +87,7 @@ export class CreateUserTripDto {
   @IsNotEmpty({ message: 'Destinations are required' })
   @IsArray({ message: 'Destinations must be an array' })
   @ArrayMinSize(1, { message: 'At least one destination is required' })
+  @ArrayMaxSize(5, { message: 'No more than 5 destinations are allowed' })
   @ValidateNested({ each: true })
   @Type(() => DestinationDto)
   destinations: DestinationDto[];
@@ -96,4 +100,38 @@ export class CreateUserTripDto {
   metadata?: any;
 
   userId: string;
+
+  toUserTripEntity(): UserTripEntity {
+    const destinations = this.toUserDestinationEntities();
+
+    return new UserTripEntity({
+      userId: this.userId,
+      tripStartDate: new Date(this.startDate),
+      tripEndDate: destinations[destinations.length - 1].endDate,
+      destinations,
+    });
+  }
+
+  toUserDestinationEntities(): UserDestinationEntity[] {
+    let cumulativeDays = 0;
+    return this.destinations.map((destination, i) => {
+      const startDate = new Date(this.startDate);
+      startDate.setDate(startDate.getDate() + cumulativeDays);
+
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + destination.duration);
+
+      cumulativeDays += destination.duration;
+
+      return new UserDestinationEntity({
+        userId: this.userId,
+        cityId: destination.cityId,
+        duration: destination.duration,
+        budget: destination.budget,
+        orderIndex: i,
+        startDate,
+        endDate,
+      });
+    });
+  }
 }

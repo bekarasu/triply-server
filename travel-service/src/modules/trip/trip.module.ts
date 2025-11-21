@@ -4,15 +4,16 @@ import { UserTripController } from './controllers/user-trip.controller';
 import { UserTripEntity } from './database/entities/user-trip.entity';
 import { UserTripRepository } from './database/user-trip.repository';
 import { UserTripService } from './services/user-trip.service';
-import { UserRouteEntity } from './database/entities/user-route.entity';
+import { UserDestinationEntity } from './database/entities/user-destination.entity';
+import { CityModule } from '../city/city.module';
 
 const controllers = [UserTripController];
 const repositories = [UserTripRepository];
 const services = [UserTripService];
-const entities = [UserRouteEntity, UserTripEntity];
+const entities = [UserDestinationEntity, UserTripEntity];
 
 @Module({
-  imports: [TypeOrmModule.forFeature(entities)],
+  imports: [TypeOrmModule.forFeature(entities), CityModule],
   controllers,
   providers: [...services, ...repositories],
 })

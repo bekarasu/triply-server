@@ -93,3 +93,23 @@ export abstract class InfrastructureException extends BaseException {
     return this.httpCode;
   }
 }
+
+/**
+ * An abstract class for Infrastructure-level exceptions
+ */
+export abstract class ServiceException extends BaseException {
+  abstract code: string;
+  abstract httpCode: number;
+  message: string;
+
+  constructor(message?: string, metadata?: unknown) {
+    super(message || 'Service exception', metadata);
+    if (message) {
+      this.message = message;
+    }
+  }
+
+  getHttpProtocolCode(): number | string {
+    return this.httpCode;
+  }
+}

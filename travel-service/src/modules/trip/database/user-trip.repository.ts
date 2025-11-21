@@ -13,12 +13,7 @@ export class UserTripRepository {
   /**
    * Create a new user trip
    */
-  async create(createData: Partial<UserTripEntity>): Promise<UserTripEntity> {
-    const entity = new UserTripEntity({
-      ...createData,
-      tripStartDate: new Date(createData.tripStartDate),
-      tripEndDate: new Date(createData.tripEndDate),
-    });
+  async create(entity: Partial<UserTripEntity>): Promise<UserTripEntity> {
     return this.repository.save(entity);
   }
 
@@ -50,7 +45,7 @@ export class UserTripRepository {
       queryBuilder.offset(options.offset);
     }
 
-    queryBuilder.leftJoinAndSelect('trip.routes', 'routes');
+    queryBuilder.leftJoinAndSelect('trip.destinations', 'destinations');
     queryBuilder.orderBy('trip.createdAt', 'DESC');
 
     return queryBuilder.getMany();

@@ -15,5 +15,6 @@ const entities = [CityEntity, CountryEntity];
   imports: [TypeOrmModule.forFeature(entities)],
   controllers,
   providers: [...services, ...repositories],
+  exports: [CityService],
 })
 export class CityModule {}
