@@ -1,8 +1,9 @@
 import { ValidationError } from '@nestjs/common';
-import { BaseException } from '../../libs/exceptions';
+import { InfrastructureException } from '../../libs/exceptions';
 
-export class InvalidRequestDataException extends BaseException {
+export class InvalidRequestDataException extends InfrastructureException {
   code = 'INVALID_PARAMS';
+  httpCode = 422;
   messages: string[] = [];
 
   constructor(validationErrors: ValidationError[]) {

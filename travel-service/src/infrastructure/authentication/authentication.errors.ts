@@ -1,91 +1,37 @@
-import { ErrorProtocol, InfrastructureException } from '@src/libs';
+import { InfrastructureException } from '@src/libs';
 
 export class InvalidAccessTokenException extends InfrastructureException {
   code = 'INVALID_ACCESS_TOKEN';
-  constructor(message = 'Invalid access token error') {
-    super(message);
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 401;
-    }
-    return this.code;
-  }
+  httpCode = 401;
+  message = 'Invalid access token error';
 }
 
 export class MissingAccessTokenException extends InfrastructureException {
   code = 'MISSING_ACCESS_TOKEN';
-  constructor() {
-    super('Mising access token error');
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 400;
-    }
-    return this.code;
-  }
+  httpCode = 400;
+  message = 'Missing access token error';
 }
 
 export class AccessTokenExpiredException extends InfrastructureException {
   code = 'ACCESS_TOKEN_EXPIRED';
-  constructor() {
-    super('Access token expired error');
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 401;
-    }
-    return this.code;
-  }
+  httpCode = 401;
+  message = 'Access token expired error';
 }
 
 export class InvalidUserProviderException extends InfrastructureException {
   code = 'INVALID_USER_PROVIDER';
-  constructor() {
-    super('Invalid user provider');
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 401;
-    }
-    return this.code;
-  }
+  httpCode = 401;
+  message = 'Invalid user provider error';
 }
 
 export class InvalidServerKeyException extends InfrastructureException {
   code = 'INVALID_SERVER_KEY';
-  constructor() {
-    super('Invalid server key');
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 401;
-    }
-    return this.code;
-  }
+  httpCode = 401;
+  message = 'Invalid server key error';
 }
 
 export class MissingServerKeyException extends InfrastructureException {
   code = 'MISSING_SERVER_KEY';
-  constructor() {
-    super('Missing server key');
-  }
-
-  getProtocolCode(protocol: ErrorProtocol): string | number {
-    switch (protocol) {
-      case 'http':
-        return 401;
-    }
-    return this.code;
-  }
+  httpCode = 400;
+  message = 'Missing server key error';
 }

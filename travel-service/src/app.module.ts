@@ -11,6 +11,7 @@ import { InfrasAuthenticationModule } from './infrastructure/authentication';
 import { RequestTimeoutModule } from './infrastructure/request-timeout';
 import { CityModule } from './modules/city/city.module';
 import { TripModule } from './modules/trip/trip.module';
+import { SerializationModule } from './infrastructure/serialization';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { TripModule } from './modules/trip/trip.module';
     RedisInfrasModule,
     InfrasAuthenticationModule,
     RequestTimeoutModule,
+    SerializationModule,
     LoggerModule.forRootAsync({
       type: 'console',
       configProvider: {

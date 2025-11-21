@@ -61,6 +61,7 @@ export abstract class BaseHttpException<
       error: {
         code: error.code,
         message: error.message,
+        details: error.details,
       },
     };
   }
@@ -80,7 +81,7 @@ export class HttpInfrastructureException extends BaseHttpException<Infrastructur
   public readonly code: string;
 
   constructor(infrasException: InfrastructureException) {
-    super(infrasException, infrasException.getProtocolCode('http') as number);
+    super(infrasException, infrasException.getHttpProtocolCode() as number);
     this.code = infrasException.code;
   }
 }

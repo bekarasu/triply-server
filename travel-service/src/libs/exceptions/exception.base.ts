@@ -79,9 +79,17 @@ export abstract class BaseException extends Error {
  */
 export abstract class InfrastructureException extends BaseException {
   abstract code: string;
-  /**
-   * Get protocol code of a specific protocol (http, gRPC, etc)
-   * @param protocol
-   */
-  abstract getProtocolCode(protocol: ErrorProtocol): number | string;
+  abstract httpCode: number;
+  message: string;
+
+  constructor(message?: string, metadata?: unknown) {
+    super(message || 'Infrastructure exception', metadata);
+    if (message) {
+      this.message = message;
+    }
+  }
+
+  getHttpProtocolCode(): number | string {
+    return this.httpCode;
+  }
 }
